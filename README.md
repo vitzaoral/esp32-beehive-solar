@@ -13,6 +13,8 @@ struct Settings
 {
     const char *wifiSSID = "YYY";
     const char *wifiPassword = "ZZZ";
+    const char *blynkAuth = "XXX";
+    const char *version = "3.0.0"
 };
 ```
 ### Features

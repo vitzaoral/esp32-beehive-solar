@@ -3,3 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+.pioenvs
+.piolibdeps
+.vscode/extensions.json
+src/settings.cpp
