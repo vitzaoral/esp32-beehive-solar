@@ -1,5 +1,5 @@
 # ESP32 beehive solar controler (WiFi version)
-Online solar charger and temperature monitoring based on the ESP32 and others sensors. WiFi version.
+Online solar charger and temperature monitoring based on the ESP32. PWM solar charger charge 12v lead acid battery. YX850 switches two big 5v powerbanks (60Ah) and is measured with INA3221.
 
 ## 🚀 BLYNK 2.0 🚀
 Project is devepoled using new version of [Blynk 2.0](https://docs.blynk.io/en/)
@@ -19,24 +19,18 @@ struct Settings
 ```
 ### Features
 * measuring the temperature and humidity
-measuring the temperature, humidity and pressure outside the hive
 * measuring the solar charger and 12V battery
+* measuring powerbanks
 
 ### Currents list:
 
-* [ESP32 WROOM-32](https://www.aliexpress.com/item/ESP32-ESP-32-ESP32S-ESP-32S-CP2102-Wireless-WiFi-Bluetooth-Development-Board-Micro-USB-Dual-Core/32867696371.html)
-* [BMP280 digital temperature/humidity/pressure sensor](https://www.aliexpress.com/item/32849462236.html)
-* Solar panel 18V with battery and solar charger or other power supply
-
-### Save battery power:
-* Set CPU frequency to 30% (80Mhz) - *setCpuFrequencyMhz(80);*
-* Setup lowest WiFi power - *WiFi.setTxPower(WIFI_POWER_MINUS_1dBm);*
-* Setup static IP, Gateway and DNS (quicker WiFi connection) - *WiFi.config(settings.ip, settings.gateway, settings.subnet, settings.gateway);*
-* When disconnect WiFi, turn off WiFi modem - *WiFi.disconnect(true);*
+* ESP32 WROOM-32
+* SHT31 temperature & humidity sensor
+* INA3221 sensor
+* 2x 18V 40W Solar panel
+* PWM solar charger 10A
+* 12V 60Ah lead acid battery
+* YX850 5V Automatic Switching UPS
 
 ### Schema:
-TODO:
-![Schema](https://github.com/vitzaoral/esp32-beehive-wifi/blob/master/schema/schema.png)
-
-### Powering 5V -> 3.3V:
-3v3 regulator - https://randomnerdtutorials.com/esp8266-voltage-regulator-lipo-and-li-ion-batteries/
+![Schema](https://github.com/vitzaoral/esp32-beehive-solar/blob/master/schema/schema.png)

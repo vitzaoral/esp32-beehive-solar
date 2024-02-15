@@ -1,16 +1,16 @@
 #ifndef __MeteoData_H
 #define __MeteoData_H
 
+#include <SPI.h>
 #include <Arduino.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
+#include <Wire.h>
+#include "Adafruit_SHT31.h"
 
 
 struct TempAndHumidity
 {
     float temperature;
     float humidity;
-    float pressure;
 };
 
 class MeteoData

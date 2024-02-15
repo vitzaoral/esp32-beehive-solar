@@ -15,6 +15,11 @@ Settings settings;
 
 #define SDA 21
 #define SCL 22
+#define LED_GREEN "#10b34e"
+#define LED_RED "#FF0000"
+
+WidgetLED led1(V47);
+WidgetLED led2(V48);
 
 // Synchronize settings from Blynk server with device when internet is connected
 BLYNK_CONNECTED()
@@ -183,7 +188,8 @@ void InternetConnection::disconnect()
     }
 }
 
-void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController powerController) {
+void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController powerController)
+{
     // create data to send to Blynk
     if (Blynk.connected())
     {
@@ -198,12 +204,23 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         // solar power data
         Blynk.virtualWrite(V8, powerController.sensor_solar.loadVoltage);
         Blynk.virtualWrite(V9, powerController.sensor_solar.current_mA);
-        Blynk.virtualWrite(V10, powerController.sensor_solar.power_mW);
+        Blynk.virtualWrite(V10, powerController.sensor_solar.power_mW * 1000.0);
 
         // battery power data
         Blynk.virtualWrite(V41, powerController.sensor_battery.loadVoltage);
         Blynk.virtualWrite(V42, powerController.sensor_battery.current_mA);
-        Blynk.virtualWrite(V43, powerController.sensor_battery.power_mW);
+        Blynk.virtualWrite(V43, powerController.sensor_battery.power_mW * 1000.0);
+
+        // powerbank power data
+        Blynk.virtualWrite(V44, powerController.sensor_battery.loadVoltage);
+        Blynk.virtualWrite(V45, powerController.sensor_battery.current_mA);
+        Blynk.virtualWrite(V46, powerController.sensor_battery.power_mW * 1000.0);
+
+        // powerbanks leds
+        led1.on();
+        led2.on();
+        led1.setColor(powerController.powerBank1Connected ? LED_GREEN : LED_RED);
+        led2.setColor(powerController.powerBank2Connected ? LED_GREEN : LED_RED);
 
         // set SDA/SCL status
         setI2CStatusVersion();
@@ -211,7 +228,6 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         // outdoor temperature sensor
         Blynk.virtualWrite(V22, meteoData.sensorOutdoor.humidity);
         Blynk.virtualWrite(V23, meteoData.sensorOutdoor.temperature);
-        Blynk.virtualWrite(V24, meteoData.sensorOutdoor.pressure);
 
         // WIFI info
         Blynk.virtualWrite(V39, "IP: " + WiFi.localIP().toString() + "|G: " + WiFi.gatewayIP().toString() + "|S: " + WiFi.subnetMask().toString() + "|DNS: " + WiFi.dnsIP().toString());
@@ -223,7 +239,7 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         }
         Blynk.virtualWrite(V4, String(deepSleepInterval));
         Serial.println("Sending data to Blynk - DONE");
-        
+
         // send data...
         delay(500);
     }

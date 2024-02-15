@@ -5,24 +5,30 @@ InternetConnection connection;
 MeteoData meteoData;
 PowerController powerController;
 
+#define POWER_BANK_PIN 36
+
 void sendDataToInternet();
 
 void setup()
 {
   Serial.begin(115200);
 
-  meteoData.initializeSensors();
+  pinMode(POWER_BANK_PIN, INPUT); // 36 = GPIO36 = ADC1_CH0 read if powerbank 1 is connected (has energy)
+
+   meteoData.initializeSensors();
+   powerController.initializeSensors();
 
   Serial.println("Setup done");
 
-  sendDataToInternet();
+ sendDataToInternet();
   Serial.println("Data sended, BYE");
   esp_deep_sleep(connection.deepSleepInterval * 1000000);
 }
 
 void loop()
 {
-  
+  // delay(1000);
+  // sendDataToInternet();
 }
 
 void sendDataToInternet()
@@ -35,7 +41,7 @@ void sendDataToInternet()
     powerController.setData();
 
     Serial.println("Sending data to Blynk");
-    connection.sendDataToBlynk(meteoData, powerController);
+     connection.sendDataToBlynk(meteoData, powerController);
     connection.disconnect();
   }
   else
