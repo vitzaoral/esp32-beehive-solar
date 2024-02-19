@@ -204,23 +204,23 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         // solar power data
         Blynk.virtualWrite(V8, powerController.sensor_solar.loadVoltage);
         Blynk.virtualWrite(V9, powerController.sensor_solar.current_mA);
-        Blynk.virtualWrite(V10, powerController.sensor_solar.power_mW * 1000.0);
+        Blynk.virtualWrite(V10, powerController.sensor_solar.power_mW / 1000.0);
 
-        // battery power data
+        // 12V battery power data
         Blynk.virtualWrite(V41, powerController.sensor_battery.loadVoltage);
         Blynk.virtualWrite(V42, powerController.sensor_battery.current_mA);
-        Blynk.virtualWrite(V43, powerController.sensor_battery.power_mW * 1000.0);
+        Blynk.virtualWrite(V43, powerController.sensor_battery.power_mW / 1000.0);
 
         // powerbank power data
-        Blynk.virtualWrite(V44, powerController.sensor_battery.loadVoltage);
-        Blynk.virtualWrite(V45, powerController.sensor_battery.current_mA);
-        Blynk.virtualWrite(V46, powerController.sensor_battery.power_mW * 1000.0);
+        Blynk.virtualWrite(V44, powerController.sensor_powerbank.loadVoltage);
+        Blynk.virtualWrite(V45, powerController.sensor_powerbank.current_mA);
+        Blynk.virtualWrite(V46, powerController.sensor_powerbank.power_mW / 1000.0);
 
         // powerbanks leds
         led1.on();
         led2.on();
-        led1.setColor(powerController.powerBank1Connected ? LED_GREEN : LED_RED);
-        led2.setColor(powerController.powerBank2Connected ? LED_GREEN : LED_RED);
+        led1.setColor(powerController.powerBank1Connected == 1 ? LED_GREEN : LED_RED);
+        led2.setColor(powerController.powerBank2Connected == 1 ? LED_GREEN : LED_RED);
 
         // set SDA/SCL status
         setI2CStatusVersion();

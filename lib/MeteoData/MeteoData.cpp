@@ -17,7 +17,7 @@ void MeteoData::initializeSensors()
 void MeteoData::setData()
 {
     // int delayTime = 300;
-
+    Serial.println("");
     Serial.print("Outdoor sensor: ");
     sensorOutdoor.temperature = sht31.readTemperature();
     sensorOutdoor.humidity = sht31.readHumidity();
@@ -27,5 +27,6 @@ void MeteoData::setData()
 void MeteoData::printSensorData(TempAndHumidity *data)
 {
     Serial.print("temperature: " + String(data->temperature) + "°C ");
-    Serial.print("humidity: " + String(data->humidity) + "% ");
+    Serial.println("humidity: " + String(data->humidity) + "% ");
+    Serial.println("");
 }

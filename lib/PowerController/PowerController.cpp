@@ -14,11 +14,10 @@ SDL_Arduino_INA3221 ina3221;
 void PowerController::initializeSensors()
 {
     ina3221.begin();
-    Serial.println("ina3221 begin");
 }
 
 void PowerController::setData()
-{    
+{
     Serial.println("Solar sensor:");
     setData(ina3221, 1, &sensor_solar);
 
@@ -30,27 +29,11 @@ void PowerController::setData()
 
     int sensorValue = digitalRead(POWER_BANK_PIN);
 
-    if (sensorValue == HIGH)
-    {
-        Serial.println("Powerbank 1 is connected (has energy)");
-        powerBank1Connected = true;
-    }
-    else
-    {
-        Serial.println("Powerbank 1 is not connected (has no energy)");
-        powerBank1Connected = false;
-    }
+    powerBank1Connected = (sensorValue == HIGH);
+    Serial.println(powerBank1Connected ? "Powerbank 1 CONNECTED" : "Powerbank 1 DISCONECTED");
 
-    if (sensorValue == LOW && sensor_powerbank.loadVoltage > 0.0)
-    {
-        Serial.println("Powerbank 2 is connected (has energy)");
-        powerBank2Connected = true;
-    }
-    else
-    {
-        Serial.println("Powerbank 2 is not connected (has no energy)");
-        powerBank2Connected = false;
-    }
+    powerBank2Connected = (sensorValue == LOW && sensor_powerbank.loadVoltage > 4.0);
+    Serial.println(powerBank2Connected ? "Powerbank 2 CONNECTED" : "Powerbank 2 DISCONECTED");
 }
 
 void PowerController::setData(SDL_Arduino_INA3221 sensor, int channel, PowerData *data)
@@ -76,4 +59,5 @@ void PowerController::setData(SDL_Arduino_INA3221 sensor, int channel, PowerData
     Serial.print("Výkon zátěž:  ");
     Serial.print(data->power_mW);
     Serial.println(" mW");
+    Serial.println("");
 }
