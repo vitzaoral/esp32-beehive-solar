@@ -1,6 +1,6 @@
 #include "PowerController.h"
 
-SDL_Arduino_INA3221 ina3221;
+INA3221 ina3221(INA3221_ADDR40_GND);
 
 #define POWER_BANK_PIN 36
 
@@ -13,19 +13,21 @@ SDL_Arduino_INA3221 ina3221;
 
 void PowerController::initializeSensors()
 {
-    ina3221.begin();
+     ina3221.begin(&Wire);
+     ina3221.reset();
+     ina3221.setShuntRes(100, 100, 100);
 }
 
 void PowerController::setData()
 {
     Serial.println("Solar sensor:");
-    setData(ina3221, 1, &sensor_solar);
+    setData(ina3221, INA3221_CH1, &sensor_solar);
 
     Serial.println("12V battery sensor:");
-    setData(ina3221, 2, &sensor_battery);
+    setData(ina3221, INA3221_CH2, &sensor_battery);
 
     Serial.println("5V powerbank:");
-    setData(ina3221, 3, &sensor_powerbank);
+    setData(ina3221, INA3221_CH3, &sensor_powerbank);
 
     int sensorValue = digitalRead(POWER_BANK_PIN);
 
@@ -36,12 +38,12 @@ void PowerController::setData()
     Serial.println(powerBank2Connected ? "Powerbank 2 CONNECTED" : "Powerbank 2 DISCONECTED");
 }
 
-void PowerController::setData(SDL_Arduino_INA3221 sensor, int channel, PowerData *data)
+void PowerController::setData(INA3221 sensor, ina3221_ch_t channel, PowerData *data)
 {
-    data->shuntVoltage = sensor.getShuntVoltage_mV(channel);
-    data->busVoltage = sensor.getBusVoltage_V(channel);
-    data->current_mA = sensor.getCurrent_mA(channel);
-    data->loadVoltage = data->busVoltage + (data->shuntVoltage / 1000.0);
+    data->shuntVoltage = 0;
+    data->busVoltage = 0;
+    data->current_mA = sensor.getCurrent(channel) * 1000.0;
+    data->loadVoltage = sensor.getVoltage(channel);
     data->power_mW = data->loadVoltage * data->current_mA;
 
     Serial.print("Zdroj:        ");

@@ -2,8 +2,8 @@
 #define __PowerController_H
 
 #include <Wire.h>
-// #include <INA3221.h>
-#include <SDL_Arduino_INA3221.h>
+#include <INA3221.h>
+// #include <SDL_Arduino_INA3221.h>
 
 struct PowerData
 {
@@ -26,7 +26,7 @@ public:
   bool powerBank2Connected;
 
 private:
-   void setData(SDL_Arduino_INA3221, int, PowerData *data);
+   void setData(INA3221, ina3221_ch_t, PowerData *data);
 };
 
 #endif

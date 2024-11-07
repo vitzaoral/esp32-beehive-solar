@@ -1,7 +1,7 @@
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPLalHw40y_"
 #define BLYNK_TEMPLATE_NAME "Vcely baterky"
-#define BLYNK_FIRMWARE_VERSION "3.0.0"
+#define BLYNK_FIRMWARE_VERSION "3.0.7"
 
 #include "InternetConnection.h"
 #include <BlynkSimpleEsp32.h>
@@ -221,6 +221,10 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         led2.on();
         led1.setColor(powerController.powerBank1Connected == 1 ? LED_GREEN : LED_RED);
         led2.setColor(powerController.powerBank2Connected == 1 ? LED_GREEN : LED_RED);
+
+        // powebanks isOn / isOff
+        Blynk.virtualWrite(V37, powerController.powerBank1Connected == 1);
+        Blynk.virtualWrite(V38, powerController.powerBank2Connected == 1);
 
         // set SDA/SCL status
         setI2CStatusVersion();
