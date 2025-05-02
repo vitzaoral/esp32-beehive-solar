@@ -6,7 +6,7 @@ void MeteoData::initializeSensors()
 {
     if (!sht31.begin(0x44))
     {
-        Serial.println("Could not find a valid BME280 sensor on address 0x44!");
+        Serial.println("Could not find a valid SHT31 sensor on address 0x44!");
     }
     else
     {
