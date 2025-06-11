@@ -33,4 +33,4 @@ struct Settings
 * YX850 5V Automatic Switching UPS
 
 ### Schema:
-![Schema](https://github.com/vitzaoral/esp32-beehive-solar/blob/master/schema/schema.png)
+![Schema](https://raw.githubusercontent.com/vitzaoral/esp32-beehive-solar/master/schema/schema.png)
