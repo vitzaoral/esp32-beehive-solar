@@ -1,11 +1,15 @@
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPLalHw40y_"
 #define BLYNK_TEMPLATE_NAME "Vcely baterky"
-#define BLYNK_FIRMWARE_VERSION "3.0.7"
+#define BLYNK_FIRMWARE_VERSION "3.1.0"
 
 #include "InternetConnection.h"
 #include <BlynkSimpleEsp32.h>
 #include "../../src/settings.cpp"
+#include "../../src/ble_config.h"
+#include "BeesysCa.h"
+#include <WiFiClientSecure.h>
+#include <OtaGuard.h>
 
 // hard reset
 #include <esp_int_wdt.h>
@@ -37,6 +41,9 @@ BLYNK_WRITE(InternalPinOTA)
     overTheAirURL = param.asString();
     Serial.print("overTheAirURL = ");
     Serial.println(overTheAirURL);
+
+    // stahování může na hotspotu trvat; hlídač cyklu nesmí OTA přerušit
+    OtaGuard::extend(600);
 
     HTTPClient http;
     http.begin(overTheAirURL);
@@ -122,6 +129,23 @@ BLYNK_WRITE(V0)
 }
 
 int deepSleepIntervalStatic = 0;
+int blePeriodMinutesStatic = -1;
+
+// BLE teploměry: perioda poslechu v minutách (0 = vypnuto)
+BLYNK_WRITE(BLYNK_PIN_BLE_PERIOD)
+{
+    int minutes = param.asInt();
+    if (minutes >= 0 && minutes <= 1440)
+    {
+        blePeriodMinutesStatic = minutes;
+        Serial.println("BLE scan period was set to: " + String(minutes) + " min");
+    }
+}
+
+int InternetConnection::blePeriodFromBlynk()
+{
+    return blePeriodMinutesStatic;
+}
 
 // deep sleep interval in seconds
 BLYNK_WRITE(V3)
@@ -264,4 +288,163 @@ void InternetConnection::setI2CStatusVersion()
                      String("Version: ") + settings.version;
 
     Blynk.virtualWrite(V17, message);
+}
+
+static void appendJsonString(String &out, const char *text)
+{
+    out += '"';
+    for (const char *p = text; *p; p++)
+    {
+        char c = *p;
+        if (c == '"' || c == '\\')
+        {
+            out += '\\';
+            out += c;
+        }
+        else if ((uint8_t)c < 0x20)
+            out += ' ';
+        else
+            out += c;
+    }
+    out += '"';
+}
+
+int InternetConnection::sendBleToBeesys(const BleSensorStore &store, uint32_t scanMillis)
+{
+    if (!WiFi.isConnected())
+        return 0;
+
+    char mac[18];
+    char num[24];
+    String body;
+    body.reserve(220 + store.sensorCount * 200);
+    body += "{\"gateway\":";
+    appendJsonString(body, BEESYS_GATEWAY_NAME);
+    body += ",\"firmware\":";
+    appendJsonString(body, BLYNK_FIRMWARE_VERSION);
+    snprintf(num, sizeof(num), "%lu", (unsigned long)scanMillis);
+    body += ",\"scan_ms\":";
+    body += num;
+    body += ",\"sensors\":[";
+    bool first = true;
+    for (int i = 0; i < store.sensorCount; i++)
+    {
+        const BleSensorSlot &s = store.sensors[i];
+        if (!s.seen)
+            continue;
+        if (!first)
+            body += ',';
+        first = false;
+        bleFormatMac(s.mac, mac);
+        body += "{\"mac\":\"";
+        body += mac;
+        body += "\",\"name\":";
+        appendJsonString(body, s.name);
+        body += ",\"format\":\"";
+        body += bleFormatName(s.reading.format);
+        body += '"';
+        if (s.reading.hasTemperature)
+        {
+            snprintf(num, sizeof(num), "%.2f", s.reading.temperature);
+            body += ",\"temperature\":";
+            body += num;
+        }
+        if (s.reading.hasHumidity)
+        {
+            snprintf(num, sizeof(num), "%.2f", s.reading.humidity);
+            body += ",\"humidity\":";
+            body += num;
+        }
+        if (s.reading.hasBatteryPct)
+        {
+            body += ",\"battery_pct\":";
+            body += String(s.reading.batteryPct);
+        }
+        if (s.reading.hasBatteryMv)
+        {
+            body += ",\"battery_mv\":";
+            body += String(s.reading.batteryMv);
+        }
+        body += ",\"rssi\":";
+        body += String(s.rssi);
+        body += ",\"packets\":";
+        body += String(s.packets);
+        body += '}';
+    }
+    body += "],\"unknown\":[";
+    for (int i = 0; i < store.unknownCount; i++)
+    {
+        if (i > 0)
+            body += ',';
+        bleFormatMac(store.unknown[i], mac);
+        body += '"';
+        body += mac;
+        body += '"';
+    }
+    body += "],\"encrypted_packets\":";
+    body += String(store.encryptedPackets);
+    body += '}';
+
+    WiFiClientSecure client;
+    client.setCACert(BEESYS_CA_PEM);
+    client.setHandshakeTimeout(10);
+    HTTPClient http;
+    http.setConnectTimeout(8000);
+    http.setTimeout(8000);
+    if (!http.begin(client, BEESYS_BLE_URL))
+    {
+        Serial.println("beeSys: http.begin selhal");
+        return -100;
+    }
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("X-Gateway-Token", settings.beesysToken);
+    int code = http.POST(body);
+    Serial.printf("beeSys: POST %d (%u B)\n", code, body.length());
+    if (code > 0 && code != 200)
+        Serial.println(http.getString());
+    http.end();
+    return code;
+}
+
+void InternetConnection::sendBleToBlynk(const BleSensorStore &store, int beesysCode, const char *otaState)
+{
+    if (!Blynk.connected())
+        return;
+    for (int i = 0; i < store.sensorCount; i++)
+    {
+        const BleSensorSlot &s = store.sensors[i];
+        if (!s.seen)
+            continue;
+        int pin = BLYNK_PIN_BLE_FIRST + 3 * i;
+        if (s.reading.hasTemperature)
+            Blynk.virtualWrite(pin, s.reading.temperature);
+        if (s.reading.hasHumidity)
+            Blynk.virtualWrite(pin + 1, s.reading.humidity);
+        if (s.reading.hasBatteryPct)
+            Blynk.virtualWrite(pin + 2, s.reading.batteryPct);
+    }
+
+    String status = "BLE " + String(store.seenCount()) + "/" + String(store.sensorCount);
+    if (store.unknownCount > 0)
+    {
+        char mac[18];
+        status += " | nezname:";
+        for (int i = 0; i < store.unknownCount && i < 3; i++)
+        {
+            bleFormatMac(store.unknown[i], mac);
+            status += " ";
+            status += mac;
+        }
+    }
+    if (store.encryptedPackets > 0)
+        status += " | sifrovane!";
+    status += " | beeSys " + String(beesysCode);
+    status += " | OTA " + String(otaState);
+    Blynk.virtualWrite(BLYNK_PIN_BLE_STATUS, status);
+
+    for (int i = 0; i < 5; i++)
+    {
+        Blynk.run();
+        delay(100);
+    }
 }
