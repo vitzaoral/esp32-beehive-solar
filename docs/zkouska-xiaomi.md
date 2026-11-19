@@ -71,6 +71,7 @@ Monitor ukončíš Ctrl+C. Znovu ho pustíš: `pio device monitor -b 115200`.
 | Mráz | Teploměr dej na 2–3 h do **mrazáku**. | Mrazák stíní Bluetooth, mezera v datech je normální. Po vyndání se musí sám ozvat. Zkontroluj napětí baterie (pokles v mrazu) a ve flasheru GraphMemo nejnižší teplotu. |
 | Dosah | Teploměr dej do zavřeného hrnce s poklicí (jako plechová střecha úlu) a postupně dál od brány. | U včel je nejdál 10 m. RSSI nad −85 dBm je v pořádku, pod −90 dBm začne vypadávat. |
 | Výdrž | Nech běžet. | Sleduj baterii (mV) v beeSysu, jestli neklesá rychleji než pár mV týdně. |
+| Zamrznutí (čidlo G40) | Nic, jen sleduj 2 týdny. Kusy z roku 2025+ s klonem čidla GXHT40 („G40“) někdy s pvvx po minutách až hodinách zamrznou a přestanou vysílat, pomůže jen vyndat baterii (pvvx issues #769, #762). | Žádné hlášení „mlčí“ bez vypnuté brány. Kdyby zamrzl, nekupovat další Xiaomi, ale Shelly BLU H&T. |
 | Vypnutí na dálku | V Blynku nastav V58 = 0, pak zpět 5. | BLE se přestane poslouchat od dalšího probuzení. |
 
 ## 5. Pak (zatím nedělat)
