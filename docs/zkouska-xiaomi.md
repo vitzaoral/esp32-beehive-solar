@@ -16,6 +16,10 @@ Větev `brana-xiaomi`. Zkouší se na **ESP32 ze šuplíku**, ne na desce u vče
 
 ## 1. Teploměr: nahrát pvvx z telefonu
 
+> **Xiaomi Monitor 3 Mini (MJWSD06MMC)** se nahrává stejně: firmware `MJ6_vNN.bin` přes TelinkMiFlasher po přihlášení klíči z Mi Home (pvvx issue #636).
+> Vysílá stejné formáty, brána ho zná bez úprav. Má baterii CR2450. Pár lidí ho při nahrávání zablokovalo, oprava pak jde jen kabelem přes USB-UART (pvvx issue #809).
+
+
 1. Vyndej a vrať baterii. Na iPhonu nainstaluj prohlížeč **Bluefy** (Safari neumí Web Bluetooth). Jde to i v Chrome na Macu.
 2. Otevři https://pvvx.github.io/ATC_MiThermometer/TelinkMiFlasher.html, dej **Connect** a vyber `LYWSD03MMC`.
 3. Podívej se na **Hardware version** a **Software version**:
