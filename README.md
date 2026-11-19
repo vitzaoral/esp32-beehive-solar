@@ -14,13 +14,18 @@ struct Settings
     const char *wifiSSID = "YYY";
     const char *wifiPassword = "ZZZ";
     const char *blynkAuth = "XXX";
-    const char *version = "3.0.0"
+    const char *version = "3.1.0";
+    const char *beesysToken = "TTT"; // BLE_GATEWAY_TOKEN z beeSysu (deploy/.env)
 };
 ```
+
+> Build: `pio run -e esp32dev` (platforma pevně espressif32@6.10.0 = Arduino-ESP32 2.0.17), testy parseru BLE: `pio test -e native`.
 ### Features
 * measuring the temperature and humidity
 * measuring the solar charger and 12V battery
 * measuring powerbanks
+* gateway for BLE thermometers Xiaomi LYWSD03MMC with [pvvx firmware](https://github.com/pvvx/ATC_MiThermometer) (formats pvvx custom, ATC1441, BTHome v2): every 5 min a 10 s passive NimBLE scan, then Wi-Fi; data to Blynk V58–V83 and to beeSys. Settings in `src/ble_config.h`, home test in [docs/zkouska-xiaomi.md](docs/zkouska-xiaomi.md)
+* OTA safety: after a Blynk.Air update the new firmware must reach Blynk in its first cycle, otherwise the bootloader rolls back to the previous version (`lib/OtaGuard`)
 
 ### Currents list:
 
