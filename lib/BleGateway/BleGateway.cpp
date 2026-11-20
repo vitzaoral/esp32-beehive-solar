@@ -48,7 +48,19 @@ void BleGateway::scan(uint32_t seconds)
     scanner->setWindow(100);       // = poslouchá se nepřetržitě
     scanner->setDuplicateFilter(false);
     scanner->setMaxResults(0); // výsledky neukládat, stačí callback
-    scanner->start(seconds, false);
+    // Neblokující start a vlastní limit času. Blokující start(seconds) z NimBLE 1.4.3
+    // se na ESP32-D0WDQ6 nevrátil: příjem po 10 s skončil, ale událost konce skenu
+    // nepřišla, isScanning() zůstalo true a cyklus visel až do hlídače (OtaGuard).
+    if (scanner->start(seconds, nullptr, false))
+    {
+        uint32_t deadline = millis() + seconds * 1000UL + 500UL;
+        while (scanner->isScanning() && (int32_t)(deadline - millis()) > 0)
+            delay(50);
+    }
+    else
+    {
+        Serial.println("BLE: sken se nespustil");
+    }
     scanner->stop();
     NimBLEDevice::deinit(true);
 
