@@ -15,9 +15,9 @@
 // Povolené teploměry: MAC (jak ji ukazuje TelinkMiFlasher) a název úlu.
 // Nejvýš 8. Neznámé teploměry se jen vypíšou do sériové linky a do Blynku V59.
 static const BleSensorConfig BLE_SENSORS[] = {
-    // Zkušební kus Xiaomi Monitor 3 Mini (MJWSD06MMC), MAC zjištěná bránou 20. 11. 2026
-    // z továrního vysílání (po pvvx se jmenuje MJ6_38C1A4).
-    {"A4:C1:38:38:C1:A4", "Zkouska Xiaomi"},
+    // Zkušební kus Xiaomi Monitor 3 Mini (MJWSD06MMC) s pvvx 5.9, formát PVVX (Custom).
+    // MAC podle flasheru (Get MAC) i cloudu Xiaomi; tovární firmware vysílal z jiné adresy.
+    {"A4:C1:38:52:A7:D4", "Zkouska Xiaomi"},
 };
 
 // beeSys: příjem dat z brány (token v settings.cpp jako beesysToken)
